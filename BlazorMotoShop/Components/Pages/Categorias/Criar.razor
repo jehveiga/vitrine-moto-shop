@@ -1,0 +1,39 @@
+﻿@page "/categorias/criar"
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<h3 class="text-light">Nova Categoria</h3>
+
+<div class="container">
+
+    <EditForm Model="@Categoria" OnValidSubmit="@OnValidSubmitAsync">
+        <DataAnnotationsValidator></DataAnnotationsValidator>
+        <ValidationSummary></ValidationSummary>
+        <fieldset>
+            <div class="form-group">
+                <label class="col-form-label mt-4 text-light" for="inputNome">Nome da Categoria</label>
+                <InputText @bind-Value="Categoria.Nome" class="form-control" placeholder="Campo nome da categoria" id="inputNome" />
+                <ValidationMessage For="@(() => Categoria.Nome)"></ValidationMessage>
+            </div>
+
+            <div class="form-group mt-3">
+                <button type="submit" class="btn btn-primary">Criar</button>
+                <a href="/categorias">Cancelar</a>
+            </div>
+        </fieldset>
+    </EditForm>
+
+</div>
+
+@code {
+    [Inject]
+    public ICategoriaRepository? CategoriaRepository { get; set; }
+
+    public Categoria Categoria { get; set; } = new();
+
+    protected async Task OnValidSubmitAsync()
+    {
+        await CategoriaRepository.AdicionarCategoria(Categoria);
+        Navigation.NavigateTo("categorias");
+    }
+}

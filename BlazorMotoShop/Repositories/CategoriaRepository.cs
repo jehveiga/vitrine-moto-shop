@@ -15,7 +15,7 @@ namespace BlazorMotoShop.Repositories
 
         public async Task<IEnumerable<Categoria>> ObterCategorias()
         {
-            var categorias = await _context.Categorias.ToListAsync();
+            var categorias = await _context.Categorias.AsNoTracking().OrderBy(categoria => categoria.Nome).ToListAsync();
             return categorias;
         }
 
