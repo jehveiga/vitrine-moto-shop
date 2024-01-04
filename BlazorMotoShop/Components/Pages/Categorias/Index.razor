@@ -30,7 +30,11 @@ else
             {
                 <tr class="table-light">
                     <td>@categoria.Id</td>
-                    <td class="text-center">@categoria.Nome</td>
+                    <td class="text-center">
+                        <a class="btn btn-link" href="/categorias/@categoria.Id">
+                            @categoria.Nome
+                        </a> 
+                    </td>
                     <td class="text-end">
                         <a href="/categorias/editar/@categoria.Id" class="btn btn-info">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
