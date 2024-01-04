@@ -1,0 +1,53 @@
+﻿@page "/categorias/editar/{id:int}"
+@rendermode InteractiveServer
+@inject NavigationManager Navigation
+
+@if(Categoria is null)
+{
+    <h3 class="text-info">Categoria não encontrada!</h3>
+}
+else
+{
+    <div class="container-sm">
+        <h3 class="text-info text-center">Editar Categoria</h3>
+
+        <EditForm Model="@Categoria" OnValidSubmit="@OnValidSubmitAsync">
+            <DataAnnotationsValidator></DataAnnotationsValidator>
+            <ValidationSummary></ValidationSummary>
+            <fieldset>
+                <div class="form-group ">
+                    <label class="col-form-label mt-4 text-light" for="inputNome">Nome da Categoria</label>
+                    <InputText @bind-Value="Categoria.Nome" class="form-control" placeholder="Campo nome da categoria" id="inputNome" />
+                    <ValidationMessage For="@(() => Categoria.Nome)"></ValidationMessage>
+                </div>
+
+                <div class="form-group mt-3">
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                    <a href="/categorias" class="btn btn-warning">Cancelar</a>
+                </div>
+            </fieldset>
+        </EditForm>
+
+    </div>
+}
+
+
+@code {
+    [Inject]
+    public ICategoriaRepository? CategoriaRepository { get; set; }
+
+    [Parameter]
+    public int Id { get; set; }
+
+    public Categoria? Categoria { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        Categoria = await CategoriaRepository.ObterCategoriaPorId(Id);
+    }
+
+    protected async Task OnValidSubmitAsync()
+    {
+        await CategoriaRepository.EditarCategoria(Categoria);
+        Navigation.NavigateTo("categorias");
+    }
+}
