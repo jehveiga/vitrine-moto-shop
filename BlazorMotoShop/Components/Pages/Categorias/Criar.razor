@@ -1,6 +1,7 @@
 ﻿@page "/categorias/criar"
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
+@inject ILogger<Categoria> Logger
 
 
 <div class="container-sm">
@@ -12,7 +13,7 @@
         <fieldset>
             <div class="form-group ">
                 <label class="col-form-label mt-4 text-light" for="inputNome">Nome da Categoria</label>
-                <InputText @bind-Value="Categoria.Nome" class="form-control" placeholder="Campo nome da categoria" id="inputNome" />
+                <InputText @bind-Value="Categoria.Nome" class="form-control" placeholder="nome da categoria" id="inputNome" />
                 <ValidationMessage For="@(() => Categoria.Nome)"></ValidationMessage>
             </div>
 
@@ -33,7 +34,16 @@
 
     protected async Task OnValidSubmitAsync()
     {
-        await CategoriaRepository.AdicionarCategoria(Categoria);
-        Navigation.NavigateTo("categorias");
+        try
+        {
+            await CategoriaRepository.AdicionarCategoria(Categoria);
+            Navigation.NavigateTo("categorias");
+        }
+        catch (Exception)
+        {
+            Logger.LogInformation("Falha interna do servidor");
+            throw;
+        }
+
     }
 }
