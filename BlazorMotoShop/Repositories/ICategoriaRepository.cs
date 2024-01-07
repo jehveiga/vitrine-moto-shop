@@ -6,9 +6,9 @@ namespace BlazorMotoShop.Repositories
     {
         Task<Categoria> ObterCategoriaPorId(int id);
         Task<IEnumerable<Categoria>> ObterCategorias();
+        Task<IEnumerable<Categoria>> ObterCategoriasOrdenadas();
         Task AdicionarCategoria(Categoria categoria);
         Task EditarCategoria(Categoria categoria);
         Task DeletarCategoria(Categoria categoria);
-
     }
 }

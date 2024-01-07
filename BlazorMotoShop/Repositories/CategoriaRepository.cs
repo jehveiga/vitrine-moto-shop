@@ -15,13 +15,19 @@ namespace BlazorMotoShop.Repositories
 
         public async Task<IEnumerable<Categoria>> ObterCategorias()
         {
+            var categorias = await _context.Categorias.AsNoTracking().ToListAsync();
+            return categorias;
+        }
+
+        public async Task<IEnumerable<Categoria>> ObterCategoriasOrdenadas()
+        {
             var categorias = await _context.Categorias.AsNoTracking().OrderBy(categoria => categoria.Nome).ToListAsync();
             return categorias;
         }
 
         public async Task<Categoria> ObterCategoriaPorId(int id)
         {
-            var categoria = await _context.Categorias.FindAsync(id);
+            var categoria = await _context.Categorias.FindAsync(id) ?? new();
             return categoria;
         }
 
@@ -45,7 +51,13 @@ namespace BlazorMotoShop.Repositories
 
         public void Dispose()
         {
-            _context?.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            _context.Dispose();
         }
     }
 }
