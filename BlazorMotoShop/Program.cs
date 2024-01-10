@@ -2,6 +2,7 @@ using BlazorMotoShop.Components;
 using BlazorMotoShop.Components.Account;
 using BlazorMotoShop.Data;
 using BlazorMotoShop.Repositories;
+using BlazorMotoShop.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +20,7 @@ builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuth
 
 builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
 builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
+builder.Services.AddScoped<IUploadService, UploadService>();
 
 builder.Services.AddAuthentication(options =>
     {

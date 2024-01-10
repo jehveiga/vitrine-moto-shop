@@ -1,0 +1,136 @@
+﻿@page "/produtos/criar"
+@rendermode InteractiveServer
+@inject NavigationManager Navigation
+@inject ILogger<Produto> Logger
+@attribute [Authorize]
+
+
+<div class="container">
+    <h3 class="text-info col-12">Novo Produto</h3>
+
+    <EditForm Model="@Produto" OnValidSubmit="@OnValidSubmitAsync" class="row" enctype="multipart/form-data">
+        <DataAnnotationsValidator></DataAnnotationsValidator>
+        <ValidationSummary></ValidationSummary>
+        <ul>
+            @foreach (var mensagem in mensagens)
+            {
+                <li class="text-danger">@mensagem</li>
+            }
+        </ul>
+
+        <div class="col-md-8">
+            <label class="col-form-label mt-4 text-light" for="inputNome">Nome do Produto</label>
+            <InputText @bind-Value="Produto.Nome" class="form-control" placeholder="Título do produto" id="inputNome" />
+            <ValidationMessage For="@(() => Produto.Nome)"></ValidationMessage>
+        </div>
+
+        <div class="col-md-8">
+            <label class="col-form-label mt-4 text-light" for="inputDescricao">Descrição do Produto</label>
+            <InputTextArea @bind-Value="Produto.Descricao" class="form-control" placeholder="Escreva os detalhes do produto" id="inputDescricao" rows="3" />
+            <ValidationMessage For="@(() => Produto.Descricao)"></ValidationMessage>
+        </div>
+
+        <div class="col-md-8">
+            <label for="InputCategoria" class="form-label mt-4 text-light">Categoria</label>
+            <InputSelect @bind-Value="Produto.CategoriaId" class="form-select" id="InputCategoria">
+
+                <option value="">Selecione</option>
+                @foreach (var categoria in Categorias)
+                {
+                    <option value="@categoria.Id">
+                        @categoria.Nome
+                    </option>
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => Produto.CategoriaId)"></ValidationMessage>
+        </div>
+
+        <div class="col-md-8">
+            <label class="col-form-label mt-4 text-light" for="inputPreco">Preço</label>
+            <InputNumber @bind-Value="Produto.Preco" class="form-control" placeholder="Preço do produto" id="inputPreco" />
+            <ValidationMessage For="@(() => Produto.Preco)"></ValidationMessage>
+        </div>
+
+        <div class="col-md-8">
+            <label class="col-form-label mt-4 text-light" for="inputImagem">Imagem do Produto</label>
+            <InputFile @bind-Value="Produto.ImageUrl" OnChange="@SelecionaArquivo" multiple accept=".avif, .pnj, .jpg, .jpeg" class="form-control" id="inputImagem" />
+            <ValidationMessage For="@(() => Produto.ImageUrl)"></ValidationMessage>
+        </div>
+
+        <div class="form-group mt-3">
+            <button type="submit" class="btn btn-primary">Criar</button>
+            <a href="/categorias" class="btn btn-warning">Cancelar</a>
+        </div>
+    </EditForm>
+
+</div>
+
+@code {
+    [Inject]
+    public IProdutoRepository? ProdutoRepository { get; set; }
+
+    [Inject]
+    public ICategoriaRepository? CategoriaRepository { get; set; }
+
+    [Inject]
+    public IUploadService? UploadService { get; set; }
+
+    public Produto Produto { get; set; } = new();
+    public IEnumerable<Categoria> Categorias { get; set; } = Enumerable.Empty<Categoria>();
+
+    public IBrowserFile? arquivo { get; set; }
+    int tamanhoMaximoArquivo = 1024 * 1024 * 1; // representa 1MB
+    IList<string> mensagens = new List<string>();
+
+    protected async override Task OnInitializedAsync()
+    {
+        try
+        {
+            Categorias = await CategoriaRepository.ObterCategorias();
+        }
+        catch (Exception)
+        {
+            Logger.LogInformation("Falha interna do servidor");
+            throw;
+        }
+    }
+
+    protected void SelecionaArquivo(InputFileChangeEventArgs eventArgs)
+    {
+        arquivo = eventArgs.GetMultipleFiles(tamanhoMaximoArquivo).FirstOrDefault();
+        Produto.ImageUrl = arquivo.Name;
+    }
+
+    protected async Task OnValidSubmitAsync()
+    {
+        try
+        {
+            mensagens.Clear();
+            var extensoesPermitidas = new string[] { ".png", ".avif", ".pnj", ".jpg", ".jpeg" };
+
+            mensagens.Add("Arquivo enviado ");
+            (RetornoStatusUploadArquivo statusRetorno, string statusMessage) =
+                await UploadService.ArquivoUploadAsync(arquivo, tamanhoMaximoArquivo, extensoesPermitidas);
+
+            if (statusRetorno == RetornoStatusUploadArquivo.Success)
+            {
+                mensagens.Add($" {arquivo.Name} ");
+                Produto.ImageUrl = statusMessage;
+            }
+            else
+            {
+                mensagens.Add(statusMessage);
+                return;
+            }
+
+            await ProdutoRepository.AdicionarProduto(Produto);
+            Navigation.NavigateTo("produtos");
+        }
+        catch (Exception)
+        {
+            Logger.LogInformation("Falha interna do servidor");
+            throw;
+        }
+
+    }
+}

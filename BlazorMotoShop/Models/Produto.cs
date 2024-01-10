@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Reflection;
 
 namespace BlazorMotoShop.Models
 {
@@ -20,6 +21,7 @@ namespace BlazorMotoShop.Models
         [Column(TypeName = "decimal(10, 2)")]
         [DisplayName("Preço")]
         [Required(ErrorMessage = "O campo {0} não pode ser em branco")]
+        [Range(1, 999999, ErrorMessage = "O campo {0} tem que conter valor entre {1} a {2}")]
         public decimal Preco { get; set; }
 
         [MaxLength(250)]
