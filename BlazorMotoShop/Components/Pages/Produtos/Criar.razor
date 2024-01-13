@@ -53,13 +53,13 @@
 
         <div class="col-md-8">
             <label class="col-form-label mt-4 text-light" for="inputImagem">Imagem do Produto</label>
-            <InputFile @bind-Value="Produto.ImageUrl" OnChange="@SelecionaArquivo" multiple accept=".avif, .pnj, .jpg, .jpeg" class="form-control" id="inputImagem" />
+            <InputFile @bind-Value="Produto.ImageUrl" OnChange="@SelecionaArquivo" multiple accept=".pnj, .jpg, .jpeg" class="form-control" id="inputImagem" />
             <ValidationMessage For="@(() => Produto.ImageUrl)"></ValidationMessage>
         </div>
 
         <div class="form-group mt-3">
             <button type="submit" class="btn btn-primary">Criar</button>
-            <a href="/categorias" class="btn btn-warning">Cancelar</a>
+            <a href="/produtos" class="btn btn-warning">Cancelar</a>
         </div>
     </EditForm>
 
@@ -106,7 +106,7 @@
         try
         {
             mensagens.Clear();
-            var extensoesPermitidas = new string[] { ".png", ".avif", ".pnj", ".jpg", ".jpeg" };
+            var extensoesPermitidas = new string[] { ".png",".pnj", ".jpg", ".jpeg" };
 
             mensagens.Add("Arquivo enviado ");
             (RetornoStatusUploadArquivo statusRetorno, string statusMessage) =

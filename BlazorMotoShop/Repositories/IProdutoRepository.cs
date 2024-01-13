@@ -6,7 +6,7 @@ namespace BlazorMotoShop.Repositories
     {
         Task<Produto> ObterProdutoPorId(int id);
         Task<IEnumerable<Produto>> ObterProdutos();
-        Task<List<IGrouping<int, Produto>>> ObterProdutosPorCategoria();
+        Task<IEnumerable<Produto>> ObterProdutosComCategoria();
         Task AdicionarProduto(Produto produto);
         Task EditarProduto(Produto produto);
         Task DeletarProduto(Produto produto);

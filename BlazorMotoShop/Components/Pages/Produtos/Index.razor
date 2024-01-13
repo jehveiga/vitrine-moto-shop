@@ -1,0 +1,47 @@
+﻿@page "/produtos"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+
+<h3 class="text-info text-center">Lista de Produtos</h3>
+
+<a href="produtos/criar" class="btn btn-primary">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-square-fill me-1 mb-1" viewBox="0 0 16 16">
+        <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm6.5 4.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3a.5.5 0 0 1 1 0" />
+    </svg>
+    Novo Produto
+</a>
+
+@if (!Produtos.Any())
+{
+    <MotoLoad></MotoLoad>
+}
+else
+{
+    @if (Produtos.Count() > 0)
+    {
+        var produtosPorCategoria = Produtos.GroupBy(produto => produto.CategoriaId).OrderBy(produto => produto.Key);
+
+        @foreach (var prodGrupo in produtosPorCategoria)
+        {
+            <h4 class="text-center text-success">@prodGrupo.FirstOrDefault(pg => pg.CategoriaId == prodGrupo.Key).Categoria.Nome</h4>
+
+            <div class="container d-flex flex-wrap">
+                <ExibirProdutos Produtos="@prodGrupo"></ExibirProdutos>
+            </div>
+            <hr class="mb-2" />
+        }
+    }
+}
+
+@code {
+    [Inject]
+    public IProdutoRepository? ProdutoRepository { get; set; }
+
+    public IEnumerable<Produto> Produtos { get; set; } = Enumerable.Empty<Produto>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Task.Delay(2000);
+        Produtos = await ProdutoRepository.ObterProdutosComCategoria();
+
+    }
+}

@@ -42,10 +42,8 @@ namespace BlazorMotoShop.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<List<IGrouping<int, Produto>>> ObterProdutosPorCategoria() =>
-                                                        await _context.Produtos.AsNoTracking()
-                                                        .GroupBy(produto => produto.CategoriaId)
-                                                        .OrderBy(produto => produto.Key).ToListAsync();
+        public async Task<IEnumerable<Produto>> ObterProdutosComCategoria() =>
+                                                        await _context.Produtos.Include(produto => produto.Categoria).AsNoTracking().ToListAsync();
 
         public void Dispose()
         {
