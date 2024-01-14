@@ -23,6 +23,13 @@ namespace BlazorMotoShop.Repositories
             return await _context.Produtos.AsNoTracking().ToListAsync();
         }
 
+        public async Task<Produto> ObterProdutoComCategoria(int id) => await _context.Produtos.Include(produto => produto.Categoria)
+                                                                                              .AsNoTracking()
+                                                                                              .FirstOrDefaultAsync(produto => produto.Id == id) ?? new();
+
+        public async Task<IEnumerable<Produto>> ObterProdutosComCategoria() =>
+                                                await _context.Produtos.Include(produto => produto.Categoria).AsNoTracking().ToListAsync();
+
         public async Task AdicionarProduto(Produto produto)
         {
             await _context.Produtos.AddAsync(produto);
@@ -41,9 +48,6 @@ namespace BlazorMotoShop.Repositories
             _context.Produtos.Update(produto);
             await _context.SaveChangesAsync();
         }
-
-        public async Task<IEnumerable<Produto>> ObterProdutosComCategoria() =>
-                                                        await _context.Produtos.Include(produto => produto.Categoria).AsNoTracking().ToListAsync();
 
         public void Dispose()
         {
