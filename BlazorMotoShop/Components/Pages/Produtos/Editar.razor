@@ -59,7 +59,7 @@
 
             <div class="col-md-8">
                 <label class="col-form-label mt-4 text-light" for="inputImagem">Imagem do Produto</label>
-                <InputFile @bind-Value="Produto.ImageUrl" OnChange="@SelecionaArquivo" multiple accept=".png, .pnj, .jpg, .jpeg" class="form-control" id="inputImagem" />
+                <InputFile @bind-Value="Produto.ImageUrl" OnChange="@SelecionaArquivo" multiple accept=".png, .jpg, .jpeg" class="form-control" id="inputImagem" />
                 <ValidationMessage For="@(() => Produto.ImageUrl)"></ValidationMessage>
             </div>
 
@@ -79,6 +79,8 @@
     [Inject]
     public IProdutoRepository? ProdutoRepository { get; set; }
 
+    private string _nomeTemporarioImagemArquivoSalvo { get; set; }
+
     [Inject]
     public ICategoriaRepository? CategoriaRepository { get; set; }
 
@@ -86,6 +88,9 @@
 
     [Inject]
     public IUploadService? UploadService { get; set; }
+
+    [Inject]
+    public IManipuladorArquivo? ManipuladorArquivo { get; set; }
 
     public IEnumerable<Categoria> Categorias { get; set; } = Enumerable.Empty<Categoria>();
 
@@ -100,6 +105,8 @@
             Categorias = await CategoriaRepository.ObterCategorias();
 
             Produto = await ProdutoRepository.ObterProdutoPorId(Id);
+
+            _nomeTemporarioImagemArquivoSalvo = Produto.ImageUrl;
         }
         catch (Exception)
         {
@@ -119,22 +126,28 @@
         try
         {
             mensagens.Clear();
-            var extensoesPermitidas = new string[] { ".png", ".pnj", ".jpg", ".jpeg" };
+            var extensoesPermitidas = new string[] { ".png", ".jpg", ".jpeg" };
 
-            mensagens.Add("Arquivo enviado ");
-            (RetornoStatusUploadArquivo statusRetorno, string statusMessage) =
-                await UploadService.ArquivoUploadAsync(arquivo, tamanhoMaximoArquivo, extensoesPermitidas);
+            if (!ManipuladorArquivo.VerificarNomeArquivoSalvo(Produto.ImageUrl))
+            {
+                ManipuladorArquivo.ExcluiArquivoSalvo(_nomeTemporarioImagemArquivoSalvo);
 
-            if (statusRetorno == RetornoStatusUploadArquivo.Success)
-            {
-                mensagens.Add($" {arquivo.Name} ");
-                Produto.ImageUrl = statusMessage;
+                mensagens.Add("Arquivo enviado ");
+                (RetornoStatusUploadArquivo statusRetorno, string statusMessage) =
+                    await UploadService.ArquivoUploadAsync(arquivo, tamanhoMaximoArquivo, extensoesPermitidas);
+
+                if (statusRetorno == RetornoStatusUploadArquivo.Success)
+                {
+                    mensagens.Add($" {arquivo.Name} ");
+                    Produto.ImageUrl = statusMessage;
+                }
+                else
+                {
+                    mensagens.Add(statusMessage);
+                    return;
+                }
             }
-            else
-            {
-                mensagens.Add(statusMessage);
-                return;
-            }
+
 
             await ProdutoRepository.EditarProduto(Produto);
             Navigation.NavigateTo("produtos");

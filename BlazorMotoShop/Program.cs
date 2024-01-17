@@ -21,6 +21,7 @@ builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuth
 builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
 builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
 builder.Services.AddScoped<IUploadService, UploadService>();
+builder.Services.AddScoped<IManipuladorArquivo, ManipuladorArquivo>();
 
 builder.Services.AddAuthentication(options =>
     {
