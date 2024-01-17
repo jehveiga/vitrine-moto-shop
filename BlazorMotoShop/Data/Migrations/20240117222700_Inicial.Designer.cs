@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlazorMotoShop.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20231231221220_Criar_EntidadesProjeto")]
-    partial class Criar_EntidadesProjeto
+    [Migration("20240117222700_Inicial")]
+    partial class Inicial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
