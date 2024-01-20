@@ -19,6 +19,9 @@
         <EditForm Model="Input" FormName="profile" OnValidSubmit="OnValidSubmitAsync" method="post">
             <DataAnnotationsValidator />
             <ValidationSummary class="text-danger" role="alert" />
+            <div class="col-md-12">
+                <UploadProfilePicture/>
+            </div>
             <div class="form-floating mb-3">
                 <input type="text" value="@username" class="form-control" placeholder="Please choose your username." disabled />
                 <label for="username" class="form-label">Username</label>
@@ -27,6 +30,10 @@
                 <InputText @bind-Value="Input.PhoneNumber" class="form-control" placeholder="Please enter your phone number." />
                 <label for="phone-number" class="form-label">Phone number</label>
                 <ValidationMessage For="() => Input.PhoneNumber" class="text-danger" />
+            </div>
+
+            <div class="form-floating mb-3">
+                <img id="pictureProfile" style="width: 120px; height: 120px; object-fit:cover"src="@imageDataURL"/>
             </div>
             <button type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
         </EditForm>
@@ -37,6 +44,10 @@
     private ApplicationUser user = default!;
     private string? username;
     private string? phoneNumber;
+    private byte[]? _profilePicture;
+
+    private string? imagesrc;
+    private string? imageDataURL;
 
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
@@ -49,8 +60,41 @@
         user = await UserAccessor.GetRequiredUserAsync(HttpContext);
         username = await UserManager.GetUserNameAsync(user);
         phoneNumber = await UserManager.GetPhoneNumberAsync(user);
+        _profilePicture = user.ProfilePicture;
+
+        if(_profilePicture != null)
+        {
+            imagesrc = Convert.ToBase64String(_profilePicture);
+            imageDataURL = string.Format("data:image/jpeg;base64,{0}", imagesrc);
+        }
+        else
+        {
+            _profilePicture = LoadDefaultImage("/image/sem-foto-perfil-300x300.jpg");
+
+            imagesrc = Convert.ToBase64String(_profilePicture);
+            imageDataURL = string.Format("data:image/jpeg;base64,{0}", imagesrc);
+        }
 
         Input.PhoneNumber ??= phoneNumber;
+        Input.ProfilePicture ??= _profilePicture;
+    }
+
+    private byte[] LoadDefaultImage(string caminhoImageDefault)
+    {
+        try
+        {
+            // Caminho relativo ao wwwroot
+            var wwwrootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            var imagePath = string.Concat(wwwrootPath, caminhoImageDefault);
+
+            // Carregue a imagem padrão como um array de byte
+            return File.ReadAllBytes(imagePath);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao carregar a imagem padrão: {ex.Message}");
+            return new byte[0];
+        }
     }
 
     private async Task OnValidSubmitAsync()
@@ -73,5 +117,9 @@
         [Phone]
         [Display(Name = "Phone number")]
         public string? PhoneNumber { get; set; }
+
+        [Display(Name = "Profile Picture")]
+        public byte[]? ProfilePicture { get; set; }
     }
+
 }

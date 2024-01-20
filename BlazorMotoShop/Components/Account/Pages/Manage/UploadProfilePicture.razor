@@ -1,0 +1,46 @@
+﻿@using BlazorMotoShop.Data
+@using Microsoft.AspNetCore.Identity
+
+@rendermode InteractiveServer
+
+@inject IServiceProvider ServiceProvider
+
+<label class="col-form-label mb=3 text-light" asp-for="@UserProfile?.ProfilePicture"></label>
+@if (UserProfile?.ProfilePicture?.Length > 0)
+{
+    <img id="profilePicture" class="mb-3" style="width: 120px;height: 120px; object-fit:cover"
+         src="data:image/*;base64,@(Convert.ToBase64String(UserProfile.ProfilePicture))" />
+}
+else
+{
+    <InputFile OnChange="LoadFiles" multiple accept=".png, .jpg, .jpeg" class="form-control form-control-sm mb-3" id="imagemProfile" />
+}
+
+
+@code {
+    [Parameter]
+    public ApplicationUser UserProfile { get; set; } = default!;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+
+    private async Task LoadFiles(InputFileChangeEventArgs eventArgs)
+    {
+        MemoryStream memoryStream = new();
+
+        // Copia os dados obtidos do arquivo para o objeto Stream de memoria
+        await eventArgs.File.OpenReadStream().CopyToAsync(memoryStream);
+        var bytesImage = memoryStream.ToArray();
+
+        await using var scope = ServiceProvider.CreateAsyncScope();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+        // Recarrega a ApplicationUser então pode fazer modificações para um novo escopo.
+        var principal = (await AuthenticationState).User;
+        UserProfile = await userManager.GetUserAsync(principal) ?? throw new Exception("Could not reload user!");
+
+        UserProfile.ProfilePicture = bytesImage;
+
+        await userManager.UpdateAsync(UserProfile);
+    }
+}
